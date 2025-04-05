@@ -113,12 +113,14 @@ const Navbar: React.FC = () => {
             
             <SignedOut>
               {/* Show sign-in buttons when signed out */}
-              <Link to="/sign-in">
-                <Button variant="ghost">Sign in</Button>
-              </Link>
-              <Link to="/sign-up">
-                <Button className="bg-academy-600 hover:bg-academy-700">Sign up</Button>
-              </Link>
+              <div className="flex items-center space-x-2">
+                <Link to="/sign-in">
+                  <Button variant="ghost">Sign in</Button>
+                </Link>
+                <Link to="/sign-up">
+                  <Button className="bg-academy-600 hover:bg-academy-700">Sign up</Button>
+                </Link>
+              </div>
             </SignedOut>
           </div>
 
