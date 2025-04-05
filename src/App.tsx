@@ -31,7 +31,7 @@ const App = () => (
                 <RequestPage />
               </SignedIn>
               <SignedOut>
-                <Navigate to="/sign-in" />
+                <Navigate to="/sign-in" replace />
               </SignedOut>
             </>
           } />
@@ -42,7 +42,7 @@ const App = () => (
                 <Forum />
               </SignedIn>
               <SignedOut>
-                <Navigate to="/sign-in" />
+                <Navigate to="/sign-in" replace />
               </SignedOut>
             </>
           } />

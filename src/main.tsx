@@ -4,6 +4,7 @@ import { ClerkProvider } from "@clerk/clerk-react";
 import App from './App.tsx'
 import './index.css'
 
+// Use the environment variable with a fallback
 const PUBLISHABLE_KEY = import.meta.env.VITE_CLERK_PUBLISHABLE_KEY || "pk_test_ZHJpdmluZy1hYXJkdmFyay0yOC5jbGVyay5hY2NvdW50cy5kZXYk";
 
 if (!PUBLISHABLE_KEY) {
