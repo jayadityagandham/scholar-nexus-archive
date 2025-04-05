@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { 
@@ -10,7 +10,8 @@ import {
   X,
   UserCircle,
   MessageSquare,
-  Calendar
+  Calendar,
+  LogOut
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -20,13 +21,20 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { SignedIn, SignedOut, useUser, useClerk } from '@clerk/clerk-react';
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const [userRole, setUserRole] = useState<'student' | 'faculty' | 'public'>('student');
+  const { user } = useUser();
+  const { signOut } = useClerk();
+  const navigate = useNavigate();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
+  };
+
+  const handleSignOut = () => {
+    signOut(() => navigate('/'));
   };
 
   return (
@@ -67,41 +75,51 @@ const Navbar: React.FC = () => {
               Request
             </Link>
             
-            {/* User dropdown */}
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="ml-2">
-                  <UserCircle className="h-6 w-6" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuLabel>
-                  Account
-                  <div className="text-xs font-normal text-muted-foreground">
-                    {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
-                  </div>
-                </DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>
-                  <Link to="/profile" className="flex w-full">My Profile</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem>
-                  <Link to="/bookmarks" className="flex w-full">Bookmarks</Link>
-                </DropdownMenuItem>
-                <DropdownMenuItem 
-                  onSelect={() => {
-                    // Cycle through roles for demo purposes
-                    if (userRole === 'student') setUserRole('faculty');
-                    else if (userRole === 'faculty') setUserRole('public');
-                    else setUserRole('student');
-                  }}
-                >
-                  Change Role
-                </DropdownMenuItem>
-                <DropdownMenuSeparator />
-                <DropdownMenuItem>Sign out</DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            {/* Authentication controls */}
+            <SignedIn>
+              {/* User dropdown - show when signed in */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="ghost" size="icon" className="ml-2">
+                    <UserCircle className="h-6 w-6" />
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuLabel>
+                    {user?.firstName || 'Account'}
+                    {user?.emailAddresses && user.emailAddresses.length > 0 && (
+                      <div className="text-xs font-normal text-muted-foreground">
+                        {user.emailAddresses[0].emailAddress}
+                      </div>
+                    )}
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem>
+                    <Link to="/profile" className="flex w-full">My Profile</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem>
+                    <Link to="/bookmarks" className="flex w-full">Bookmarks</Link>
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onSelect={handleSignOut}>
+                    <div className="flex items-center">
+                      <LogOut className="h-4 w-4 mr-2" />
+                      Sign out
+                    </div>
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </SignedIn>
+            
+            <SignedOut>
+              {/* Show sign-in buttons when signed out */}
+              <Link to="/sign-in">
+                <Button variant="ghost">Sign in</Button>
+              </Link>
+              <Link to="/sign-up">
+                <Button className="bg-academy-600 hover:bg-academy-700">Sign up</Button>
+              </Link>
+            </SignedOut>
           </div>
 
           {/* Mobile menu button */}
@@ -163,51 +181,72 @@ const Navbar: React.FC = () => {
               Request
             </Link>
             
-            <div className="pt-4 pb-3 border-t border-gray-200">
-              <div className="flex items-center px-4">
-                <div className="flex-shrink-0">
-                  <UserCircle className="h-10 w-10 text-gray-400" />
-                </div>
-                <div className="ml-3">
-                  <div className="text-base font-medium text-gray-800">Demo User</div>
-                  <div className="text-sm font-medium text-gray-500">
-                    {userRole.charAt(0).toUpperCase() + userRole.slice(1)}
+            {/* Mobile authentication menu */}
+            <SignedIn>
+              <div className="pt-4 pb-3 border-t border-gray-200">
+                <div className="flex items-center px-4">
+                  <div className="flex-shrink-0">
+                    <UserCircle className="h-10 w-10 text-gray-400" />
+                  </div>
+                  <div className="ml-3">
+                    <div className="text-base font-medium text-gray-800">
+                      {user?.firstName || 'User'} {user?.lastName || ''}
+                    </div>
+                    {user?.emailAddresses && user.emailAddresses.length > 0 && (
+                      <div className="text-sm font-medium text-gray-500">
+                        {user.emailAddresses[0].emailAddress}
+                      </div>
+                    )}
                   </div>
                 </div>
+                <div className="mt-3 space-y-1 px-2">
+                  <Link 
+                    to="/profile" 
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    My Profile
+                  </Link>
+                  <Link 
+                    to="/bookmarks" 
+                    className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Bookmarks
+                  </Link>
+                  <button 
+                    className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
+                    onClick={() => {
+                      setMobileMenuOpen(false);
+                      handleSignOut();
+                    }}
+                  >
+                    Sign out
+                  </button>
+                </div>
               </div>
-              <div className="mt-3 space-y-1 px-2">
-                <Link 
-                  to="/profile" 
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  My Profile
-                </Link>
-                <Link 
-                  to="/bookmarks" 
-                  className="block px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
-                  onClick={() => setMobileMenuOpen(false)}
-                >
-                  Bookmarks
-                </Link>
-                <button 
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
-                  onClick={() => {
-                    // Cycle through roles for demo purposes
-                    if (userRole === 'student') setUserRole('faculty');
-                    else if (userRole === 'faculty') setUserRole('public');
-                    else setUserRole('student');
-                  }}
-                >
-                  Change Role
-                </button>
-                <button 
-                  className="block w-full text-left px-3 py-2 rounded-md text-base font-medium text-gray-600 hover:bg-gray-50"
-                >
-                  Sign out
-                </button>
+            </SignedIn>
+            
+            <SignedOut>
+              <div className="pt-4 pb-3 border-t border-gray-200">
+                <div className="flex flex-col space-y-2">
+                  <Link
+                    to="/sign-in"
+                    className="block w-full text-center px-4 py-2 border border-gray-300 shadow-sm text-sm font-medium rounded-md text-gray-700 bg-white hover:bg-gray-50"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign in
+                  </Link>
+                  <Link
+                    to="/sign-up"
+                    className="block w-full text-center px-4 py-2 border border-transparent shadow-sm text-sm font-medium rounded-md text-white bg-academy-600 hover:bg-academy-700"
+                    onClick={() => setMobileMenuOpen(false)}
+                  >
+                    Sign up
+                  </Link>
+                </div>
               </div>
-            </div>
+            </SignedOut>
           </div>
         </div>
       )}
