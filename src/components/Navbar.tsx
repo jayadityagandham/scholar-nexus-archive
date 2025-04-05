@@ -11,7 +11,9 @@ import {
   UserCircle,
   MessageSquare,
   Calendar,
-  LogOut
+  LogOut,
+  Shield,
+  GraduationCap
 } from 'lucide-react';
 import {
   DropdownMenu,
@@ -22,12 +24,14 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { SignedIn, SignedOut, useUser, useClerk } from '@clerk/clerk-react';
+import { useRoleCheck } from '@/hooks/useRoleCheck';
 
 const Navbar: React.FC = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { user } = useUser();
   const { signOut } = useClerk();
   const navigate = useNavigate();
+  const { isAdmin, isFaculty } = useRoleCheck();
 
   const toggleMobileMenu = () => {
     setMobileMenuOpen(!mobileMenuOpen);
@@ -68,12 +72,30 @@ const Navbar: React.FC = () => {
             <Link to="/browse" className="text-gray-600 hover:text-academy-600 px-3 py-2 rounded-md text-sm font-medium">
               Browse
             </Link>
-            <Link to="/forum" className="text-gray-600 hover:text-academy-600 px-3 py-2 rounded-md text-sm font-medium">
-              Forums
-            </Link>
-            <Link to="/request" className="text-gray-600 hover:text-academy-600 px-3 py-2 rounded-md text-sm font-medium">
-              Request
-            </Link>
+            
+            <SignedIn>
+              {/* Role-specific navigation links */}
+              {isAdmin() && (
+                <Link to="/admin" className="text-gray-600 hover:text-academy-600 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                  <Shield className="h-4 w-4 mr-1" />
+                  Admin
+                </Link>
+              )}
+              
+              {isFaculty() && (
+                <Link to="/faculty" className="text-gray-600 hover:text-academy-600 px-3 py-2 rounded-md text-sm font-medium flex items-center">
+                  <GraduationCap className="h-4 w-4 mr-1" />
+                  Faculty
+                </Link>
+              )}
+              
+              <Link to="/forum" className="text-gray-600 hover:text-academy-600 px-3 py-2 rounded-md text-sm font-medium">
+                Forums
+              </Link>
+              <Link to="/request" className="text-gray-600 hover:text-academy-600 px-3 py-2 rounded-md text-sm font-medium">
+                Request
+              </Link>
+            </SignedIn>
             
             {/* Authentication controls */}
             <SignedIn>
@@ -94,6 +116,26 @@ const Navbar: React.FC = () => {
                     )}
                   </DropdownMenuLabel>
                   <DropdownMenuSeparator />
+                  
+                  {/* Role-specific dropdown items */}
+                  {isAdmin() && (
+                    <DropdownMenuItem>
+                      <Link to="/admin" className="flex w-full items-center">
+                        <Shield className="h-4 w-4 mr-2" />
+                        Admin Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  
+                  {isFaculty() && (
+                    <DropdownMenuItem>
+                      <Link to="/faculty" className="flex w-full items-center">
+                        <GraduationCap className="h-4 w-4 mr-2" />
+                        Faculty Dashboard
+                      </Link>
+                    </DropdownMenuItem>
+                  )}
+                  
                   <DropdownMenuItem>
                     <Link to="/profile" className="flex w-full">My Profile</Link>
                   </DropdownMenuItem>
@@ -165,23 +207,48 @@ const Navbar: React.FC = () => {
               Browse
             </Link>
             
-            <Link 
-              to="/forum" 
-              className="flex items-center text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <MessageSquare className="mr-3 h-5 w-5" />
-              Forums
-            </Link>
-            
-            <Link 
-              to="/request" 
-              className="flex items-center text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              <Calendar className="mr-3 h-5 w-5" />
-              Request
-            </Link>
+            <SignedIn>
+              {/* Role-specific mobile navigation */}
+              {isAdmin() && (
+                <Link 
+                  to="/admin" 
+                  className="flex items-center text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <Shield className="mr-3 h-5 w-5" />
+                  Admin Dashboard
+                </Link>
+              )}
+              
+              {isFaculty() && (
+                <Link 
+                  to="/faculty" 
+                  className="flex items-center text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  <GraduationCap className="mr-3 h-5 w-5" />
+                  Faculty Dashboard
+                </Link>
+              )}
+              
+              <Link 
+                to="/forum" 
+                className="flex items-center text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <MessageSquare className="mr-3 h-5 w-5" />
+                Forums
+              </Link>
+              
+              <Link 
+                to="/request" 
+                className="flex items-center text-gray-600 hover:bg-gray-50 px-3 py-2 rounded-md text-base font-medium"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Calendar className="mr-3 h-5 w-5" />
+                Request
+              </Link>
+            </SignedIn>
             
             {/* Mobile authentication menu */}
             <SignedIn>
