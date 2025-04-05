@@ -1,3 +1,4 @@
+
 import type { Config } from "tailwindcss";
 
 export default {
@@ -61,6 +62,20 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				// Custom colors for our academic hub
+				academy: {
+					'50': '#f0f7ff',
+					'100': '#dfedff',
+					'200': '#b9daff',
+					'300': '#7cbeff',
+					'400': '#369aff',
+					'500': '#1a7df7',
+					'600': '#0060e6',
+					'700': '#0048bc',
+					'800': '#003c99',
+					'900': '#05367d',
+					'950': '#03224e',
 				}
 			},
 			borderRadius: {
